@@ -1,89 +1,78 @@
 package org.elka.graphApp;
 
+import org.elka.graphApp.algorithms.DijkstraBasedAlgorithmSolver;
+import org.elka.graphApp.algorithms.MySimpleRandomGraphGenerator;
 import org.jgrapht.Graph;
-import org.jgrapht.WeightedGraph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.ext.JGraphXAdapter;
-import org.jgrapht.generate.GnpRandomGraphGenerator;
 import org.jgrapht.graph.*;
+import org.jgrapht.io.*;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.io.CharArrayReader;
+import java.io.CharArrayWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.*;
 
 /**
- * Hello world!
+ * Hello world!NoSuchMethodError: org.jgrapht.Graph.outgoingEdgesOf(
  *
  */
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ImportException {
         App app = new App();
         app.run();
     }
 
-    public void run(){
-        System.out.println("Hello World!");
+    private SimpleGraphWindow window;
 
-        GnpRandomGraphGenerator<Integer, MyWeightedEdge> generator = new GnpRandomGraphGenerator<>(6, 0.6, 123);
-        WeightedGraph<Integer, MyWeightedEdge> generatedGraph = new SimpleDirectedWeightedGraph<>((e1, e2) -> new MyWeightedEdge());
-        final int[] lastInt = {0};
-        generator.generateGraph(generatedGraph, () -> (lastInt[0]++), null);
-
-        Random random = new Random();
-        for (MyWeightedEdge edge : generatedGraph.edgeSet()) {
-            generatedGraph.setEdgeWeight(edge, random.nextDouble());
-        }
-        RemoveBidirectionalEdges(generatedGraph);
+    public void run() throws ImportException {
+        Graph<Integer, MyWeightedEdge<Integer>> generatedGraph
+                = MySimpleRandomGraphGenerator.Generate(6, 0.6, 123);
+        generatedGraph = WriteGraphToCsvAndReadGraphFromCsv(generatedGraph);
+        DijkstraBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> solver = new DijkstraBasedAlgorithmSolver();
+        List<Integer> vertices = new ArrayList<>(generatedGraph.vertexSet());
 
         DrawGraph(generatedGraph);
+
+//        GraphPath<Integer, MyWeightedEdge<Integer>> walk = solver.findShortestPath(generatedGraph, vertices.get(2), vertices.get(0));
+//        window.colorShortestPath(walk);
+
+        List<GraphPath<Integer, MyWeightedEdge<Integer>>> shortestWalks = solver.findTwoShortestPaths(generatedGraph, vertices.get(2), vertices.get(0));
+        window.colorShortestPaths(shortestWalks);
     }
 
-    private <T1,T2 extends MyWeightedEdge> void RemoveBidirectionalEdges(WeightedGraph<T1,T2> graph) {
-        HashMap<T1, List<T1>> neighbourVertices = new HashMap<>();
-        List<T2> edgesToRemove = new ArrayList<>();
+    public Graph<Integer, MyWeightedEdge<Integer>> WriteGraphToCsvAndReadGraphFromCsv(Graph<Integer, MyWeightedEdge<Integer>> graph) throws ImportException {
+        CSVExporter<Integer,MyWeightedEdge<Integer>> exporter = new CSVExporter<>();
+        exporter.setParameter(CSVFormat.Parameter.MATRIX_FORMAT_EDGE_WEIGHTS, true);
+        exporter.setFormat(CSVFormat.MATRIX);
+        Writer writer = new CharArrayWriter();
 
-        for(T2 edge : graph.edgeSet()){
-            T1 source = (T1)edge.getSource();
-            T1 target = (T1)edge.getTarget();
+        exporter.exportGraph(graph, writer);
 
-            if( !neighbourVertices.containsKey(source)){
-                neighbourVertices.put(source, new ArrayList<T1>());
-            }
-            if( !neighbourVertices.containsKey(target)){
-                neighbourVertices.put(target, new ArrayList<T1>());
-            }
+        System.out.println(writer.toString());
 
-            if(neighbourVertices.get(target).contains(source)){
-                edgesToRemove.add(edge);
-            }else {
-                neighbourVertices.get(source).add(target);
-            }
-        }
-        edgesToRemove.forEach(graph::removeEdge);
+        CSVImporter<Integer, MyWeightedEdge<Integer>> importer = new CSVImporter<>(
+                (String s, Map<String, Attribute> map) -> (Integer.parseInt(s)),
+                (v1, v2, s, map) -> graph.getEdgeFactory().createEdge(v1, v2));
+        importer.setFormat(CSVFormat.MATRIX);
+        importer.setParameter(CSVFormat.Parameter.MATRIX_FORMAT_EDGE_WEIGHTS, true);
+
+        Reader reader = new CharArrayReader(writer.toString().toCharArray());
+        Graph<Integer,MyWeightedEdge<Integer>> graph2 =
+                new SimpleDirectedWeightedGraph<Integer, MyWeightedEdge<Integer>>(graph.getEdgeFactory());
+        importer.importGraph(graph2, reader);
+
+        return graph2;
     }
 
-    private <T1, T2> void DrawGraph(Graph<T1, T2> graph) {
+    public <T1, T2> void DrawGraph(Graph<T1, T2> graph) {
         JGraphXAdapter<T1, T2> adapter = new JGraphXAdapter<>(graph);
-        SimpleGraphWindow.DrawGraph(adapter);
+        window = new SimpleGraphWindow(adapter);
+        window.DrawGraph();
     }
 
-    public class MyWeightedEdge extends DefaultWeightedEdge {
-        private DecimalFormat formater = new DecimalFormat("#.0####");
+    private static <T1,T2> void DrawGraphWithShortestPath(Graph<T1, T2> graph, GraphPath<T1, T2> shortestPath){
 
-        @Override
-        public String toString() {
-            return  formater.format(getWeight());
-        }
-
-        @Override
-        public Object getSource() {
-            return super.getSource();
-        }
-
-        @Override
-        protected Object getTarget() {
-            return super.getTarget();
-        }
     }
 }

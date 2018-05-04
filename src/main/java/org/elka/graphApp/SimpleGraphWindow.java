@@ -3,27 +3,33 @@ package org.elka.graphApp;
 import com.mxgraph.layout.mxCircleLayout;
 import com.mxgraph.layout.mxFastOrganicLayout;
 import com.mxgraph.layout.mxIGraphLayout;
+import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
 import org.jgraph.graph.DefaultEdge;
 import org.jgrapht.Graph;
+import org.jgrapht.GraphPath;
 import org.jgrapht.ListenableGraph;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultListenableGraph;
+import org.jgrapht.graph.GraphWalk;
 import org.jgrapht.graph.SimpleGraph;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
+import java.util.List;
 
-public class SimpleGraphWindow extends JApplet{
+public class SimpleGraphWindow extends JApplet {
     private mxGraph graph;
 
     public SimpleGraphWindow(mxGraph graph) {
         this.graph = graph;
     }
 
-    public static void DrawGraph(mxGraph graph) {
+    public void DrawGraph() {
         SimpleGraphWindow window = new SimpleGraphWindow(graph);
         window.init();
 
@@ -38,8 +44,7 @@ public class SimpleGraphWindow extends JApplet{
     private static final Dimension DEFAULT_SIZE = new Dimension(530, 320);
 
     @Override
-    public void init()
-    {
+    public void init() {
         // create a visualization using JGraph, via an adapter
         setPreferredSize(DEFAULT_SIZE);
         mxGraphComponent component = new mxGraphComponent(graph);
@@ -60,5 +65,59 @@ public class SimpleGraphWindow extends JApplet{
 
         layout.execute(graph.getDefaultParent());
         // that's all there is to it!...
+    }
+
+    public <V, E> void colorShortestPath(GraphPath<V, E> walk) {
+        colorShortestPaths(Collections.singletonList(walk));
+    }
+
+    public <V, E> void colorShortestPaths(List<GraphPath<V, E>> walks) {
+        if (walks.isEmpty()) {
+            System.out.println("No paths in argument!!!");
+            return;
+        }
+        GraphPath<V, E> firstPath = walks.get(0);
+        GraphPath<V, E> secondPath = null;
+        if (walks.size() > 1) {
+            secondPath = walks.get(1);
+        }
+        GraphPath<V, E> finalSecondPath = secondPath;
+
+        Arrays.stream(graph.getChildCells(graph.getDefaultParent())).map(c -> (mxCell) c).forEach(cell -> {
+            String color = null;
+            if (cell.isVertex()) {
+                if (cell.getValue().equals(firstPath.getStartVertex())) {
+                    color = MyColorConstants.ShortestPathStartColor;
+                } else if (cell.getValue().equals(firstPath.getEndVertex())) {
+                    color = MyColorConstants.ShortestPathEndColor;
+                } else if (firstPath.getVertexList().contains(cell.getValue())) {
+                    color = MyColorConstants.ShortestPathNodeColor;
+                }
+                else if(finalSecondPath != null){
+                    if(finalSecondPath.getVertexList().contains(cell.getValue())){
+                        color = MyColorConstants.SecondShortestPathNodeColor;
+                    }
+                }
+            } else if (cell.isEdge()) {
+                if (firstPath.getEdgeList().contains(cell.getValue())) {
+                    color = MyColorConstants.ShortestPathEdgeColor;
+                }
+                else if(finalSecondPath != null){
+                    if(finalSecondPath.getEdgeList().contains(cell.getValue())){
+                        color = MyColorConstants.SecondShortestPathEdgeColor;
+                    }
+                }
+            }
+
+            if (color != null) {
+                Map<String, Object> styleMap = new HashMap<>(graph.getCellStyle(cell));
+                if(cell.isVertex()){
+                    styleMap.put(mxConstants.STYLE_FILLCOLOR, color);
+                }else if(cell.isEdge()){
+                    styleMap.put(mxConstants.STYLE_STROKECOLOR, color);
+                }
+                graph.getView().getState(cell).setStyle(styleMap);
+            }
+        });
     }
 }
