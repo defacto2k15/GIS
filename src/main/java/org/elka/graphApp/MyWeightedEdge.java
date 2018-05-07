@@ -25,4 +25,10 @@ public class MyWeightedEdge<V> extends DefaultWeightedEdge {
         return (V) super.getTarget();
     }
 
+    @Override
+    public double getWeight() {
+        return super.getWeight();
+    }
+
+
 }
