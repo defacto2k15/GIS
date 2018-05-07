@@ -4,8 +4,10 @@ import org.elka.graphApp.GraphUtils;
 import org.elka.graphApp.MyWeightedEdge;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
+import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.GraphWalk;
+import sun.security.provider.certpath.Vertex;
 
 import java.util.*;
 import java.util.function.Function;
@@ -18,7 +20,6 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
     private final double INFINITY = 999999;
 
     public GraphPath<V,E> findShortestPath(Graph<V,E> graph, V startVertex, V endVertex){
-        DijkstraShortestPath<V,E> dijkstraSolver = new DijkstraShortestPath<V, E>(graph);
 
         Map<V, Double> algWeight = graph.vertexSet().stream().
                 collect( Collectors.toMap(Function.identity(), o -> INFINITY));
@@ -37,8 +38,7 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
             }
             vertexWasUsed.put(u.innerVertex, true);
 
-            for (E edge : graph.edgesOf(u.innerVertex).stream()
-                    .filter(edge -> edge.getSource().equals(u.innerVertex))
+            for (E edge : graph.outgoingEdgesOf(u.innerVertex).stream()
                     .filter(edge -> !vertexWasUsed.get(edge.getTarget()))
                     .collect(Collectors.toList())) {
                 V neighbour = edge.getTarget();
@@ -73,6 +73,8 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
 
         return new GraphWalk<V, E>(graph, startVertex, endVertex, shortestPath, pathWeight);
     }
+
+
 
     private class DistancedVertex<V> {
         private V innerVertex;
@@ -123,9 +125,8 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
             if(firstPath.getVertexList().size() == 2 ){
                 graph.removeEdge(graph.getEdge(firstPath.getStartVertex(), firstPath.getEndVertex()));
             }else {
-                firstPath.getVertexList().stream().skip(1).limit(firstPath.getVertexList().size() - 2).forEach(v -> {
-                    workGraph.removeVertex(v);
-                });
+                firstPath.getVertexList().stream().skip(1).limit(firstPath.getVertexList().size() - 2)
+                        .forEach(workGraph::removeVertex);
             }
 
             GraphPath<V,E> secondPath = findShortestPath(workGraph, startVertex, endVertex);

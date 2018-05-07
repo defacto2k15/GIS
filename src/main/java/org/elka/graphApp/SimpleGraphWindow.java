@@ -1,21 +1,11 @@
 package org.elka.graphApp;
 
 import com.mxgraph.layout.mxCircleLayout;
-import com.mxgraph.layout.mxFastOrganicLayout;
-import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
-import org.jgraph.graph.DefaultEdge;
-import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.ListenableGraph;
-import org.jgrapht.ext.JGraphXAdapter;
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultListenableGraph;
-import org.jgrapht.graph.GraphWalk;
-import org.jgrapht.graph.SimpleGraph;
 
 import javax.swing.*;
 import java.awt.*;
@@ -92,18 +82,16 @@ public class SimpleGraphWindow extends JApplet {
                     color = MyColorConstants.ShortestPathEndColor;
                 } else if (firstPath.getVertexList().contains(cell.getValue())) {
                     color = MyColorConstants.ShortestPathNodeColor;
-                }
-                else if(finalSecondPath != null){
-                    if(finalSecondPath.getVertexList().contains(cell.getValue())){
+                } else if (finalSecondPath != null) {
+                    if (finalSecondPath.getVertexList().contains(cell.getValue())) {
                         color = MyColorConstants.SecondShortestPathNodeColor;
                     }
                 }
             } else if (cell.isEdge()) {
                 if (firstPath.getEdgeList().contains(cell.getValue())) {
                     color = MyColorConstants.ShortestPathEdgeColor;
-                }
-                else if(finalSecondPath != null){
-                    if(finalSecondPath.getEdgeList().contains(cell.getValue())){
+                } else if (finalSecondPath != null) {
+                    if (finalSecondPath.getEdgeList().contains(cell.getValue())) {
                         color = MyColorConstants.SecondShortestPathEdgeColor;
                     }
                 }
@@ -111,9 +99,9 @@ public class SimpleGraphWindow extends JApplet {
 
             if (color != null) {
                 Map<String, Object> styleMap = new HashMap<>(graph.getCellStyle(cell));
-                if(cell.isVertex()){
+                if (cell.isVertex()) {
                     styleMap.put(mxConstants.STYLE_FILLCOLOR, color);
-                }else if(cell.isEdge()){
+                } else if (cell.isEdge()) {
                     styleMap.put(mxConstants.STYLE_STROKECOLOR, color);
                 }
                 graph.getView().getState(cell).setStyle(styleMap);
