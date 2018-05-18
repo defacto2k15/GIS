@@ -7,12 +7,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ForbiddenNodesRegister<V,E>{
-    ForbiddenNodesTreeVertex<V> root;
     ForbiddenNodesTreeVertex<V> activeNode;
     Queue<ForbiddenNodesTreeVertex<V>> travesalQueue = new ArrayDeque<>();
 
     public ForbiddenNodesRegister(GraphPath<V, E> path) {
-        root = new ForbiddenNodesTreeVertex<V>(Collections.emptyList() );
         travesalQueue.addAll(
         path.getVertexList().stream()
                     .skip(1).limit(path.getVertexList().size() - 2)

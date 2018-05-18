@@ -9,6 +9,7 @@ import org.jgrapht.graph.GraphWalk;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by defacto on 5/1/2018.
@@ -16,9 +17,12 @@ import java.util.stream.Collectors;
 public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
     private final double INFINITY = 999999;
 
-    public GraphPath<V,E> findShortestPath(Graph<V,E> graph, V startVertex, V endVertex){
+    public GraphPath<V,E> findShortestPath(Graph<V,E> graph, V startVertex, V endVertex) {
+        return findShortestPath(new MaskedGraph<>(graph), startVertex, endVertex);
+    }
 
-        Map<V, Double> algWeight = graph.vertexSet().stream().
+    public GraphPath<V,E> findShortestPath(MaskedGraph<V,E> graph, V startVertex, V endVertex){
+        Map<V, Double> algWeight = graph.vertices().
                 collect( Collectors.toMap(Function.identity(), o -> INFINITY));
         algWeight.put(startVertex, 0.0);
 
@@ -26,7 +30,7 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
                 Comparator.comparing(DistancedVertex::getDistanceFromStart));
         Map<V, V> predecessors = new HashMap<>();
         queue.add(new DistancedVertex<>(startVertex, 0));
-        Map<V, Boolean> vertexWasUsed = graph.vertexSet().stream().collect(Collectors.toMap(Function.identity(), o -> false));
+        Map<V, Boolean> vertexWasUsed = graph.vertices().collect(Collectors.toMap(Function.identity(), o -> false));
 
         do {
             DistancedVertex<V> u = queue.poll();
@@ -35,7 +39,7 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
             }
             vertexWasUsed.put(u.innerVertex, true);
 
-            graph.outgoingEdgesOf(u.innerVertex).stream()
+            graph.outgoingEdgesOf(u.innerVertex)
                     .filter(edge -> !vertexWasUsed.get(edge.getTarget()))
                     .forEach(edge -> {
                 V neighbour = edge.getTarget();
@@ -68,7 +72,7 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
         while(currentVertex != startVertex);
         Collections.reverse(shortestPath);
 
-        return new GraphWalk<V, E>(graph, startVertex, endVertex, shortestPath, pathWeight);
+        return new GraphWalk<V, E>(graph.getInnerGraph(), startVertex, endVertex, shortestPath, pathWeight);
     }
 
 
@@ -113,13 +117,14 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
     }
 
 
-    public List<GraphPath<V,E>> findTwoShortestPaths(Graph<V, E> originalGraph, V startVertex, V endVertex, int maxTriesCount) {
+    public List<GraphPath<V,E>> findTwoShortestPaths(Graph<V, E> originalGraph, V startVertex, V endVertex, int
+            maxTriesCount) {
         GraphPath<V, E> firstPath = findShortestPath(originalGraph, startVertex, endVertex);
         if (firstPath == null) {
             return Collections.emptyList();
         }
 
-        Graph<V, E> workGraph = GraphUtils.CopyDirectedWeightedGraph(originalGraph);
+        MaskedGraph<V, E> workGraph = new MaskedGraph<>(originalGraph);
         RemovePathInternalVertices(firstPath, workGraph);
         GraphPath<V, E> secondPath = findShortestPath(workGraph, startVertex, endVertex);
         if(secondPath != null ){
@@ -133,7 +138,7 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
 
         ForbiddenNodesRegister<V,E> register = new ForbiddenNodesRegister<V,E>(firstPath);
         for(int i=maxTriesCount; i > 0; i--){
-            workGraph = GraphUtils.CopyDirectedWeightedGraph(originalGraph);
+            workGraph = new MaskedGraph<>(originalGraph);
             List<V> forbiddenNodes = register.GetNextForbiddenNodes();
             if(forbiddenNodes == null){ // no more forbidden nodes
                 break;
@@ -147,7 +152,7 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
                 continue;
             }
 
-            Graph<V,E> secondPathGraph = GraphUtils.CopyDirectedWeightedGraph(originalGraph);
+            MaskedGraph<V,E> secondPathGraph = new MaskedGraph<>(originalGraph);
             RemovePathInternalVertices(firstPath, secondPathGraph);
             secondPath = findShortestPath(secondPathGraph, startVertex, endVertex);
             if(secondPath != null ){
@@ -158,12 +163,54 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
         return Collections.singletonList(originalFirstPath);
     }
 
-    private void RemovePathInternalVertices(GraphPath<V, E> path, Graph<V, E> graph) {
+    private void RemovePathInternalVertices(GraphPath<V, E> path, MaskedGraph<V, E> graph) {
         if(path.getVertexList().size() == 2 ){
             graph.removeEdge(graph.getEdge(path.getStartVertex(), path.getEndVertex()));
         }else {
             path.getVertexList().stream().skip(1).limit(path.getVertexList().size() - 2)
                     .forEach(graph::removeVertex);
+        }
+    }
+
+    private class MaskedGraph<V, E extends MyWeightedEdge<V>>{
+        private Graph<V,E> graph;
+        private Set<V> maskedVectices;
+        private Set<E> maskedEdges;
+
+        private MaskedGraph(Graph<V, E> graph) {
+            this.graph = graph;
+            maskedVectices = new HashSet<>();
+            maskedEdges = new HashSet<>();
+        }
+
+        public Stream<V> vertices() {
+            return graph.vertexSet().stream().filter(v -> !maskedVectices.contains(v));
+        }
+
+        public E getEdge(V source, V target) {
+            return graph.getEdge(source, target);
+        }
+
+        public Stream<E> outgoingEdgesOf(V vertex) {
+            return graph.outgoingEdgesOf(vertex).stream()
+                    .filter(c -> !maskedVectices.contains(c.getTarget()))
+                    .filter(c -> !maskedEdges.contains(c));
+        }
+
+        public double getEdgeWeight(E edge) {
+            return graph.getEdgeWeight(edge);
+        }
+
+        public Graph<V, E> getInnerGraph() {
+            return graph;
+        }
+
+        public void removeEdge(E edge) {
+            maskedEdges.add(edge);
+        }
+
+        public void removeVertex(V vertex) {
+            maskedVectices.add(vertex);
         }
     }
 }
