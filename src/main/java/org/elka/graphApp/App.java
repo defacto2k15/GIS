@@ -67,9 +67,9 @@ public class App {
     public void run() throws ImportException {
         Graph<Integer, MyWeightedEdge<Integer>> generatedGraph
                 = MySimpleRandomGraphGenerator.Generate(6, 0.6, 123);
-        generatedGraph = WriteGraphToCsvAndReadGraphFromCsv(generatedGraph);
-
-        generatedGraph = getExampleGraph(generatedGraph);
+//        generatedGraph = WriteGraphToCsvAndReadGraphFromCsv(generatedGraph);
+//
+//        generatedGraph = getExampleGraph(generatedGraph);
 
         SurballeBasesdAlgorithmSolver<Integer, MyWeightedEdge<Integer>> solver = new SurballeBasesdAlgorithmSolver<>();
         List<Integer> vertices = new ArrayList<>(generatedGraph.vertexSet());

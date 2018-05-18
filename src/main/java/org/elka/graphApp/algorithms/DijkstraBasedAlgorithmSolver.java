@@ -4,10 +4,7 @@ import org.elka.graphApp.GraphUtils;
 import org.elka.graphApp.MyWeightedEdge;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.GraphWalk;
-import sun.security.provider.certpath.Vertex;
 
 import java.util.*;
 import java.util.function.Function;
@@ -38,9 +35,9 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
             }
             vertexWasUsed.put(u.innerVertex, true);
 
-            for (E edge : graph.outgoingEdgesOf(u.innerVertex).stream()
+            graph.outgoingEdgesOf(u.innerVertex).stream()
                     .filter(edge -> !vertexWasUsed.get(edge.getTarget()))
-                    .collect(Collectors.toList())) {
+                    .forEach(edge -> {
                 V neighbour = edge.getTarget();
                 double alt = algWeight.get(edge.getSource()) + graph.getEdgeWeight(edge);
                 if (alt < algWeight.get(neighbour)) {
@@ -51,7 +48,7 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
                     algWeight.put(neighbour, alt);
                     predecessors.put(neighbour, u.getInnerVertex());
                 }
-            }
+            });
         }
         while(!queue.isEmpty());
 
@@ -116,21 +113,57 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
     }
 
 
-    public List<GraphPath<V,E>> findTwoShortestPaths(Graph<V, E> graph, V startVertex, V endVertex){
-        GraphPath<V,E> firstPath = findShortestPath(graph, startVertex, endVertex);
-        if(firstPath == null ){
+    public List<GraphPath<V,E>> findTwoShortestPaths(Graph<V, E> originalGraph, V startVertex, V endVertex, int maxTriesCount) {
+        GraphPath<V, E> firstPath = findShortestPath(originalGraph, startVertex, endVertex);
+        if (firstPath == null) {
             return Collections.emptyList();
-        }else {
-            Graph<V,E> workGraph = GraphUtils.CopyDirectedWeightedGraph(graph);
-            if(firstPath.getVertexList().size() == 2 ){
-                graph.removeEdge(graph.getEdge(firstPath.getStartVertex(), firstPath.getEndVertex()));
-            }else {
-                firstPath.getVertexList().stream().skip(1).limit(firstPath.getVertexList().size() - 2)
-                        .forEach(workGraph::removeVertex);
+        }
+
+        Graph<V, E> workGraph = GraphUtils.CopyDirectedWeightedGraph(originalGraph);
+        RemovePathInternalVertices(firstPath, workGraph);
+        GraphPath<V, E> secondPath = findShortestPath(workGraph, startVertex, endVertex);
+        if(secondPath != null ){
+            return Arrays.asList(firstPath, secondPath);
+        }
+        if(firstPath.getVertexList().size()==2){
+            return Collections.singletonList(firstPath);
+        }
+
+        GraphPath<V, E> originalFirstPath = firstPath;
+
+        ForbiddenNodesRegister<V,E> register = new ForbiddenNodesRegister<V,E>(firstPath);
+        for(int i=maxTriesCount; i > 0; i--){
+            workGraph = GraphUtils.CopyDirectedWeightedGraph(originalGraph);
+            List<V> forbiddenNodes = register.GetNextForbiddenNodes();
+            if(forbiddenNodes == null){ // no more forbidden nodes
+                break;
+            }
+            for( V node : forbiddenNodes){
+                workGraph.removeVertex(node);
             }
 
-            GraphPath<V,E> secondPath = findShortestPath(workGraph, startVertex, endVertex);
-            return Arrays.asList(firstPath,secondPath);
+            firstPath = findShortestPath(workGraph,  startVertex, endVertex);
+            if (firstPath == null) {
+                continue;
+            }
+
+            Graph<V,E> secondPathGraph = GraphUtils.CopyDirectedWeightedGraph(originalGraph);
+            RemovePathInternalVertices(firstPath, secondPathGraph);
+            secondPath = findShortestPath(secondPathGraph, startVertex, endVertex);
+            if(secondPath != null ){
+                return Arrays.asList(firstPath, secondPath);
+            }
+            register.AddNewTraversedPath(firstPath);
+        }
+        return Collections.singletonList(originalFirstPath);
+    }
+
+    private void RemovePathInternalVertices(GraphPath<V, E> path, Graph<V, E> graph) {
+        if(path.getVertexList().size() == 2 ){
+            graph.removeEdge(graph.getEdge(path.getStartVertex(), path.getEndVertex()));
+        }else {
+            path.getVertexList().stream().skip(1).limit(path.getVertexList().size() - 2)
+                    .forEach(graph::removeVertex);
         }
     }
 }
