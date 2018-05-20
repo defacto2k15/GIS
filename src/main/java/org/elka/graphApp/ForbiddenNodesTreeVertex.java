@@ -1,4 +1,4 @@
-package org.elka.graphApp.algorithms;
+package org.elka.graphApp;
 
 import java.util.List;
 

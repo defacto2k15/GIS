@@ -1,7 +1,6 @@
-package org.elka.graphApp.algorithms;
+package org.elka.graphApp;
 
 import org.jgrapht.GraphPath;
-import org.jgrapht.graph.GraphWalk;
 
 import java.util.*;
 import java.util.stream.Collectors;

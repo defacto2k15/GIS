@@ -1,10 +1,13 @@
-package org.elka.graphApp;
+package org.elka.graphApp.display;
 
 import com.mxgraph.layout.mxCircleLayout;
+import com.mxgraph.layout.mxGraphLayout;
+import com.mxgraph.layout.mxOrganicLayout;
 import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
+import org.elka.graphApp.MyColorConstants;
 import org.jgrapht.GraphPath;
 
 import javax.swing.*;
@@ -14,24 +17,28 @@ import java.util.List;
 
 public class SimpleGraphWindow extends JApplet {
     private mxGraph graph;
+    private LayoutMode layoutMode;
 
-    public SimpleGraphWindow(mxGraph graph) {
+    public SimpleGraphWindow(mxGraph graph, LayoutMode layoutMode) {
         this.graph = graph;
+        this.layoutMode = layoutMode;
+    }
+    public SimpleGraphWindow(mxGraph graph) {
+        this(graph, LayoutMode.Circle);
     }
 
     public void DrawGraph() {
-        SimpleGraphWindow window = new SimpleGraphWindow(graph);
-        window.init();
+        init();
 
         JFrame frame = new JFrame();
-        frame.getContentPane().add(window);
+        frame.getContentPane().add(this);
         frame.setTitle("JGraphT Adapter to JGraphX Demo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
     }
 
-    private static final Dimension DEFAULT_SIZE = new Dimension(530, 320);
+    private static final Dimension DEFAULT_SIZE = new Dimension(800, 800);
 
     @Override
     public void init() {
@@ -44,14 +51,30 @@ public class SimpleGraphWindow extends JApplet {
         resize(DEFAULT_SIZE);
 
         // positioning via jgraphx layouts
-        mxCircleLayout layout = new mxCircleLayout(graph);
+        mxGraphLayout layout;
+        Map<String, Object> vertexStyle = graph.getStylesheet().getDefaultVertexStyle();
+        vertexStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
+        graph.getStylesheet().setDefaultVertexStyle(vertexStyle);
 
-        // center the circle
-        int radius = 100;
-        layout.setX0((DEFAULT_SIZE.width / 2.0) - radius);
-        layout.setY0((DEFAULT_SIZE.height / 2.0) - radius);
-        layout.setRadius(radius);
-        layout.setMoveCircle(true);
+        if( layoutMode == LayoutMode.Organic) {
+            mxOrganicLayout organicLayout = new mxOrganicLayout(graph, getBounds());
+
+            organicLayout.setAverageNodeArea(40000);
+            organicLayout.setInitialMoveRadius(300);
+//        layout.setAverageNodeArea(10);
+            organicLayout.setEdgeLengthCostFactor(0);
+            organicLayout.setEdgeDistanceCostFactor(10000);
+            organicLayout.setNodeDistributionCostFactor(10);
+            layout = organicLayout;
+        }else {
+            mxCircleLayout circleLayout = new mxCircleLayout(graph);
+            int radius = 100;
+            circleLayout.setX0((DEFAULT_SIZE.width / 2.0) - radius);
+            circleLayout.setY0((DEFAULT_SIZE.height / 2.0) - radius);
+            circleLayout.setRadius(radius);
+            circleLayout.setMoveCircle(true);
+            layout = circleLayout;
+        }
 
         layout.execute(graph.getDefaultParent());
         // that's all there is to it!...

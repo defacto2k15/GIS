@@ -1,9 +1,10 @@
-package org.elka.graphApp.algorithms;
+package org.elka.graphApp.generators;
 
 import org.elka.graphApp.MyWeightedEdge;
 import org.jgrapht.Graph;
 import org.jgrapht.generate.GnpRandomGraphGenerator;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
+import org.jgrapht.graph.SimpleGraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,10 +14,14 @@ import java.util.Random;
 /**
  * Created by defacto on 5/2/2018.
  */
-public class MySimpleRandomGraphGenerator {
-    public static Graph<Integer,MyWeightedEdge<Integer>> Generate(int nodesCount, double propabilityOfEdge, int seed){
+public class MySimpleGraphGenerator {
+
+    private static final int MAX_WEIGHT = 100;
+
+    public Graph<Integer,MyWeightedEdge<Integer>> Generate(int nodesCount, double propabilityOfEdge, int seed){
         GnpRandomGraphGenerator<Integer, MyWeightedEdge<Integer>> generator
                 = new GnpRandomGraphGenerator<>(nodesCount, propabilityOfEdge, seed);
+
         Graph<Integer, MyWeightedEdge<Integer>> generatedGraph =
                 new SimpleDirectedWeightedGraph<>((e1, e2) -> new MyWeightedEdge<Integer>());
         final int[] lastInt = {0};
@@ -24,7 +29,7 @@ public class MySimpleRandomGraphGenerator {
 
         Random random = new Random(seed);
         for (MyWeightedEdge edge : generatedGraph.edgeSet()) {
-            generatedGraph.setEdgeWeight(edge, Math.floor(random.nextDouble()*12));
+            generatedGraph.setEdgeWeight(edge, Math.floor(random.nextDouble()* MAX_WEIGHT));
         }
         RemoveBidirectionalEdges(generatedGraph);
 

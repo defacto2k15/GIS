@@ -1,17 +1,25 @@
 package org.elka.graphApp;
 
-import org.elka.graphApp.algorithms.MySimpleRandomGraphGenerator;
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import org.elka.graphApp.algorithms.SurballeBasesdAlgorithmSolver;
+import org.elka.graphApp.benchmark.BenchmarkConfiguration;
+import org.elka.graphApp.benchmark.BenchmarkExecutor;
+import org.elka.graphApp.benchmark.SingleMeasure;
+import org.elka.graphApp.display.LayoutMode;
+import org.elka.graphApp.display.SimpleGraphWindow;
+import org.elka.graphApp.generators.MySimpleGraphGenerator;
+import org.elka.graphApp.generators.MyWattsStrogatzGraphGenerator;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.io.*;
 
-import java.io.CharArrayReader;
-import java.io.CharArrayWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,9 +27,10 @@ import java.util.Map;
 
 
 public class App {
-    public static void main(String[] args) throws ImportException {
+    public static void main(String[] args) throws ImportException, CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException {
         App app = new App();
-        app.run();
+//        app.run();
+        app.runBenchmark();
     }
 
     private SimpleGraphWindow window;
@@ -64,18 +73,25 @@ public class App {
         g.setEdgeWeight(edge1, wegith);
     }
 
+    public void runBenchmark() throws ImportException, IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+        BenchmarkExecutor executor = new BenchmarkExecutor();
+        List<SingleMeasure> measures = executor.Execute(new BenchmarkConfiguration());
+        Writer writer = new FileWriter("result.csv");
+        StatefulBeanToCsv<SingleMeasure> beanToCsv = new StatefulBeanToCsvBuilder<SingleMeasure>(writer)
+                .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
+        beanToCsv.write(measures);
+        writer.close();
+    }
+
     public void run() throws ImportException {
+        MySimpleGraphGenerator generator = new MySimpleGraphGenerator();
         Graph<Integer, MyWeightedEdge<Integer>> generatedGraph
-                = MySimpleRandomGraphGenerator.Generate(6, 0.6, 123);
-//        generatedGraph = WriteGraphToCsvAndReadGraphFromCsv(generatedGraph);
-//
-//        generatedGraph = getExampleGraph(generatedGraph);
+                = generator.Generate(6, 0.6, 123);
 
         SurballeBasesdAlgorithmSolver<Integer, MyWeightedEdge<Integer>> solver = new SurballeBasesdAlgorithmSolver<>();
         List<Integer> vertices = new ArrayList<>(generatedGraph.vertexSet());
 
-
-        DrawGraph(generatedGraph);
+        DrawGraph(generatedGraph, LayoutMode.Circle);
         List<GraphPath<Integer, MyWeightedEdge<Integer>>> shortestWalks = solver.findTwoShortestPaths(generatedGraph, vertices.get(0), vertices.get(5));
 
         window.colorShortestPaths(shortestWalks);
@@ -105,13 +121,9 @@ public class App {
         return graph2;
     }
 
-    public <T1, T2> void DrawGraph(Graph<T1, T2> graph) {
+    public <T1, T2> void DrawGraph(Graph<T1, T2> graph, LayoutMode layoutMode) {
         JGraphXAdapter<T1, T2> adapter = new JGraphXAdapter<>(graph);
-        window = new SimpleGraphWindow(adapter);
+        window = new SimpleGraphWindow(adapter, layoutMode);
         window.DrawGraph();
-    }
-
-    private static <T1, T2> void DrawGraphWithShortestPath(Graph<T1, T2> graph, GraphPath<T1, T2> shortestPath) {
-
     }
 }

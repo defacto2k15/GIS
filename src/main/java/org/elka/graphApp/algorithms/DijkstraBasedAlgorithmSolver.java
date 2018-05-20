@@ -1,6 +1,6 @@
 package org.elka.graphApp.algorithms;
 
-import org.elka.graphApp.GraphUtils;
+import org.elka.graphApp.ForbiddenNodesRegister;
 import org.elka.graphApp.MyWeightedEdge;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;

@@ -1,7 +1,7 @@
 package org.elka.graphApp;
 
 import org.elka.graphApp.algorithms.DijkstraBasedAlgorithmSolver;
-import org.elka.graphApp.algorithms.MySimpleRandomGraphGenerator;
+import org.elka.graphApp.generators.MySimpleGraphGenerator;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -15,6 +15,7 @@ import java.util.*;
  * Created by defacto on 5/2/2018.
  */
 public class DijkstraBasedAlgorithmSolverTest {
+    private MySimpleGraphGenerator generator = new MySimpleGraphGenerator();
 
     @Test
     public void longTest(){
@@ -26,7 +27,7 @@ public class DijkstraBasedAlgorithmSolverTest {
             double probability = +0.4 + random.nextDouble() * 0.6f;
 
             Graph<Integer, MyWeightedEdge<Integer>> testGraph =
-                    MySimpleRandomGraphGenerator.Generate(nodesCount, probability, seed);
+                    generator.Generate(nodesCount, probability, seed);
 
             List<Integer> vertices = new ArrayList<>(testGraph.vertexSet());
             for (int i = 0; i < 10; i++) {
@@ -48,7 +49,7 @@ public class DijkstraBasedAlgorithmSolverTest {
         double probability = +0.4 + random.nextDouble() * 0.6f;
 
         Graph<Integer, MyWeightedEdge<Integer>> testGraph =
-                MySimpleRandomGraphGenerator.Generate(nodesCount, probability, seed);
+                generator.Generate(nodesCount, probability, seed);
 
         List<Integer> vertices = new ArrayList<>(testGraph.vertexSet());
         Random shuffleRandom = new Random(seed + 1);
@@ -61,7 +62,7 @@ public class DijkstraBasedAlgorithmSolverTest {
     @Test
     public void simpleTestWithPath(){
         Graph<Integer, MyWeightedEdge<Integer>> testGraph =
-                MySimpleRandomGraphGenerator.Generate(5, 1, 44);
+                generator.Generate(5, 1, 44);
         Integer startVertex = new ArrayList<Integer>(testGraph.vertexSet()).get(0);
         Integer endVertex = new ArrayList<Integer>(testGraph.vertexSet()).get(4);
 //        App.DrawGraph(testGraph);
@@ -135,7 +136,7 @@ public class DijkstraBasedAlgorithmSolverTest {
             double probability = +0.2 + random.nextDouble() * 0.8f;
 
             Graph<Integer, MyWeightedEdge<Integer>> testGraph =
-                    MySimpleRandomGraphGenerator.Generate(nodesCount, probability, seed);
+                    generator.Generate(nodesCount, probability, seed);
 
             List<Integer> vertices = new ArrayList<>(testGraph.vertexSet());
             for (int i = 0; i < 10; i++) {
