@@ -116,28 +116,31 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
         }
     }
 
-
     public List<GraphPath<V,E>> findTwoShortestPaths(Graph<V, E> originalGraph, V startVertex, V endVertex, int
+            maxTriesCount) {
+        return extendedFindTwoShortestPaths(originalGraph, startVertex, endVertex, maxTriesCount).getPaths();
+    }
+
+    public DijkstraSolvingExtendedResult<V,E> extendedFindTwoShortestPaths(Graph<V, E> originalGraph, V startVertex, V
+    endVertex, int
             maxTriesCount) {
         GraphPath<V, E> firstPath = findShortestPath(originalGraph, startVertex, endVertex);
         if (firstPath == null) {
-            return Collections.emptyList();
+            return new DijkstraSolvingExtendedResult<>(Collections.emptyList(), 1);
         }
 
         MaskedGraph<V, E> workGraph = new MaskedGraph<>(originalGraph);
         RemovePathInternalVertices(firstPath, workGraph);
         GraphPath<V, E> secondPath = findShortestPath(workGraph, startVertex, endVertex);
         if(secondPath != null ){
-            return Arrays.asList(firstPath, secondPath);
+            return new DijkstraSolvingExtendedResult<>( Arrays.asList(firstPath, secondPath), 1);
         }
         if(firstPath.getVertexList().size()==2){
-            return Collections.singletonList(firstPath);
+            return new DijkstraSolvingExtendedResult<>( Collections.singletonList(firstPath), 1);
         }
 
-        GraphPath<V, E> originalFirstPath = firstPath;
-
         ForbiddenNodesRegister<V,E> register = new ForbiddenNodesRegister<V,E>(firstPath);
-        for(int i=maxTriesCount; i > 0; i--){
+        for(int i=0; i < maxTriesCount; i++){
             workGraph = new MaskedGraph<>(originalGraph);
             List<V> forbiddenNodes = register.GetNextForbiddenNodes();
             if(forbiddenNodes == null){ // no more forbidden nodes
@@ -147,20 +150,20 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
                 workGraph.removeVertex(node);
             }
 
-            firstPath = findShortestPath(workGraph,  startVertex, endVertex);
-            if (firstPath == null) {
+            GraphPath<V, E> newFirstPath = findShortestPath(workGraph,  startVertex, endVertex);
+            if (newFirstPath == null) {
                 continue;
             }
 
             MaskedGraph<V,E> secondPathGraph = new MaskedGraph<>(originalGraph);
-            RemovePathInternalVertices(firstPath, secondPathGraph);
+            RemovePathInternalVertices(newFirstPath, secondPathGraph);
             secondPath = findShortestPath(secondPathGraph, startVertex, endVertex);
             if(secondPath != null ){
-                return Arrays.asList(firstPath, secondPath);
+                return new DijkstraSolvingExtendedResult<>(Arrays.asList(newFirstPath, secondPath), i+2);
             }
-            register.AddNewTraversedPath(firstPath);
+            register.AddNewTraversedPath(newFirstPath);
         }
-        return Collections.singletonList(originalFirstPath);
+        return new DijkstraSolvingExtendedResult<>(Collections.singletonList(firstPath), maxTriesCount+1);
     }
 
     private void RemovePathInternalVertices(GraphPath<V, E> path, MaskedGraph<V, E> graph) {

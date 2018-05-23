@@ -14,9 +14,10 @@ public class SingleMeasure {
     private final GraphGeneratorType generatorType;
     private final float dijkstraPropability;
     private final long time;
-    private double dijkstraFirstPathWeight;
-    private double dijkstraSecondPathWeight;
+    private double firstPathWeight;
+    private double secondPathWeight;
     private int wattsKParam;
+    private int dijkstraTriesCount;
 
     public SingleMeasure(int nodesCount, int edgesCount, AlgorithmType algorithmType, GraphGeneratorType generatorType,
                          float dijkstraPropability, long time) {
@@ -30,12 +31,12 @@ public class SingleMeasure {
     }
 
 
-    public void setDijkstraFirstPathWeight(double dijkstraFirstPathWeight) {
-        this.dijkstraFirstPathWeight = dijkstraFirstPathWeight;
+    public void setFirstPathWeight(double dijkstraFirstPathWeight) {
+        this.firstPathWeight = dijkstraFirstPathWeight;
     }
 
-    public void setDijkstraSecondPathWeight(double dijkstraSecondPathWeight) {
-        this.dijkstraSecondPathWeight = dijkstraSecondPathWeight;
+    public void setSecondPathWeight(double dijkstraSecondPathWeight) {
+        this.secondPathWeight = dijkstraSecondPathWeight;
     }
 
     public void setWattsKParam(int wattsKParam) {
@@ -66,15 +67,23 @@ public class SingleMeasure {
         return time;
     }
 
-    public double getDijkstraFirstPathWeight() {
-        return dijkstraFirstPathWeight;
+    public double getFirstPathWeight() {
+        return firstPathWeight;
     }
 
-    public double getDijkstraSecondPathWeight() {
-        return dijkstraSecondPathWeight;
+    public double getSecondPathWeight() {
+        return secondPathWeight;
     }
 
     public int getWattsKParam() {
         return wattsKParam;
+    }
+
+    public void setDijkstraTriesCount(int dijkstraTriesCount) {
+        this.dijkstraTriesCount = dijkstraTriesCount;
+    }
+
+    public int getDijkstraTriesCount() {
+        return dijkstraTriesCount;
     }
 }

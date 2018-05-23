@@ -87,6 +87,7 @@ public class App {
         MySimpleGraphGenerator generator = new MySimpleGraphGenerator();
         Graph<Integer, MyWeightedEdge<Integer>> generatedGraph
                 = generator.Generate(6, 0.6, 123);
+        generatedGraph.getEdge(new Integer(1), new Integer(3));
 
         SurballeBasesdAlgorithmSolver<Integer, MyWeightedEdge<Integer>> solver = new SurballeBasesdAlgorithmSolver<>();
         List<Integer> vertices = new ArrayList<>(generatedGraph.vertexSet());
