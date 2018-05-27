@@ -128,24 +128,24 @@ public class DijkstraBasedAlgorithmSolverTest {
     public void longBenchmark(){
         DijkstraBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> mySolver = new DijkstraBasedAlgorithmSolver<>();
         long start = System.nanoTime();
-        for(int j = 0; j < 100; j++) {
+        for(int j = 0; j < 1; j++) {
 //            System.out.println("J is "+j);
             int seed = j +400;
             Random random = new Random(seed);
-            int nodesCount = random.nextInt(100) +20 ;
+            int nodesCount = random.nextInt(700) +200 ;
             double probability = +0.2 + random.nextDouble() * 0.8f;
 
             Graph<Integer, MyWeightedEdge<Integer>> testGraph =
                     generator.Generate(nodesCount, probability, seed);
 
             List<Integer> vertices = new ArrayList<>(testGraph.vertexSet());
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100; i++) {
                 Random shuffleRandom = new Random(seed + i);
                 Collections.shuffle(vertices, shuffleRandom);
                 Integer startVertex = vertices.get(0);
                 Integer endVertex = vertices.get(1);
-//                System.out.println("Size: "+mySolver.findTwoShortestPaths(testGraph, startVertex, endVertex, 10)
-//                        .size());
+                System.out.println("Size: "+mySolver.findTwoShortestPaths(testGraph, startVertex, endVertex, 10)
+                        .size());
             }
         }
         System.out.println("Method took "+(System.nanoTime()-start));
