@@ -1,6 +1,5 @@
 package org.elka.graphApp.algorithms;
 
-import org.elka.graphApp.MyWeightedEdge;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.ShortestPathAlgorithm;

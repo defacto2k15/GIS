@@ -1,4 +1,4 @@
-package org.elka.graphApp;
+package org.elka.graphApp.display;
 
 /**
  * Created by defacto on 5/3/2018.

@@ -7,8 +7,9 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
-import org.elka.graphApp.MyColorConstants;
+import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
+import org.jgrapht.ext.JGraphXAdapter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,8 +24,9 @@ public class SimpleGraphWindow extends JApplet {
         this.graph = graph;
         this.layoutMode = layoutMode;
     }
-    public SimpleGraphWindow(mxGraph graph) {
-        this(graph, LayoutMode.Circle);
+
+    public SimpleGraphWindow(Graph graph) {
+        this(new JGraphXAdapter<>(graph), LayoutMode.Circle);
     }
 
     public void DrawGraph() {
@@ -131,4 +133,5 @@ public class SimpleGraphWindow extends JApplet {
             }
         });
     }
+
 }

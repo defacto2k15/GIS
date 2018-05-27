@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.elka.graphApp.parsing.CommaSeparatedFloats;
 import org.elka.graphApp.parsing.CommaSeparatedIntegers;
+import org.elka.graphApp.parsing.GraphReader;
 
 import java.util.List;
 
@@ -20,7 +21,8 @@ public class BenchmarkConfiguration extends OptionsBase {
             name = "help",
             abbrev = 'h',
             help = "Prints usage info.",
-            defaultValue = "true"
+            defaultValue = "true",
+            category = "benchmark"
     )
     public boolean help;
 
@@ -28,35 +30,40 @@ public class BenchmarkConfiguration extends OptionsBase {
             name = "minNodeCount",
             abbrev = 'n',
             help = "This sets minimal node count in tests",
-            defaultValue = "10"
+            defaultValue = "10",
+            category = "benchmark"
     )
     public int minNodeCount;
     @Option(
             name = "maxNodeCount",
             abbrev = 'm',
             help = "This sets maximal nodes count in tests",
-            defaultValue = "100"
+            defaultValue = "100",
+            category = "benchmark"
     )
     public int maxNodeCount;
     @Option(
             name = "dijkstra",
             abbrev = 'd',
             help = "This flag enables dijkstra tests",
-            defaultValue = "true"
+            defaultValue = "true",
+            category = "benchmark"
     )
     public boolean dijkstraTests;
     @Option(
             name = "surballe",
             abbrev = 's',
             help = "This flag enables surballe tests",
-            defaultValue = "false"
+            defaultValue = "false",
+            category = "benchmark"
     )
     public boolean surballeTests;
     @Option(
             name = "tests",
             abbrev = 't',
             help = "Sets number of tests",
-            defaultValue = "600"
+            defaultValue = "600",
+            category = "benchmark"
     )
     public int testsCount;
 
@@ -67,7 +74,8 @@ public class BenchmarkConfiguration extends OptionsBase {
             help = "This sets erdos probabilities per test",
             allowMultiple = true,
             converter = CommaSeparatedFloats.class,
-            defaultValue = "0.8f"
+            defaultValue = "0.8f",
+            category = "benchmark"
     )
     public List<Float> erdosProbabilitiesPerTest;
     @Option(
@@ -76,7 +84,7 @@ public class BenchmarkConfiguration extends OptionsBase {
             help = "This sets watts probabilities per test",
             converter = CommaSeparatedFloats.class,
             allowMultiple = true,
-            category = "startup",
+            category = "benchmark",
             defaultValue = "0.8f"
     )
     public List<Float> wattsProbabilitiesPerTest;
@@ -87,10 +95,38 @@ public class BenchmarkConfiguration extends OptionsBase {
             help = "This sets kWatts params per test",
             allowMultiple = true,
             defaultValue = "8",
+            category = "benchmark",
             converter = CommaSeparatedIntegers.class
     )
     public List<Integer> wattsKParamsPerTest;
+    @Option(name = "testOutputFile",
+            abbrev = 'o',
+            help = "This option specifies the output file for test",
+            defaultValue = "result.csv",
+            category = "benchmark")
+    public String outputFile;
 
+    @Option(name = "inputFile",
+            abbrev = 'i',
+            help = "This options allows to test surballe and dijkstra algorithm on graph passed by user\n" +
+            GraphReader.FILE_FORMAT,
+            defaultValue = "",
+            category = "user input" )
+    public String inputFile;
+
+    @Option(name = "dijkstraUser",
+            abbrev = 'x',
+            help = "Test for dijkstra",
+            defaultValue = "true",
+            category = "user input" )
+    public boolean dijkstra;
+
+    @Option(name = "surballeUser",
+            abbrev = 'f',
+            help = "Test for surballe",
+            defaultValue = "true",
+            category = "user input" )
+    public boolean surballe;
 
     public boolean shouldTestDijkstra() {
         return dijkstraTests;

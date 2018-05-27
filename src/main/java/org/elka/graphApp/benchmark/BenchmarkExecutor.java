@@ -1,6 +1,6 @@
 package org.elka.graphApp.benchmark;
 
-import org.elka.graphApp.MyWeightedEdge;
+import org.elka.graphApp.algorithms.MyWeightedEdge;
 import org.elka.graphApp.algorithms.AlgorithmType;
 import org.elka.graphApp.algorithms.DijkstraBasedAlgorithmSolver;
 import org.elka.graphApp.algorithms.SurballeBasedAlgorithmSolver;

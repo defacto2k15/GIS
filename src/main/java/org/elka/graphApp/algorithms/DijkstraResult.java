@@ -1,6 +1,5 @@
 package org.elka.graphApp.algorithms;
 
-import org.elka.graphApp.MyWeightedEdge;
 import org.jgrapht.graph.GraphWalk;
 
 import java.util.Map;
