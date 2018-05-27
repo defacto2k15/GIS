@@ -3,7 +3,7 @@ package org.elka.graphApp.benchmark;
 import org.elka.graphApp.MyWeightedEdge;
 import org.elka.graphApp.algorithms.AlgorithmType;
 import org.elka.graphApp.algorithms.DijkstraBasedAlgorithmSolver;
-import org.elka.graphApp.algorithms.SurballeBasesdAlgorithmSolver;
+import org.elka.graphApp.algorithms.SurballeBasedAlgorithmSolver;
 import org.elka.graphApp.generators.GraphGeneratorType;
 import org.elka.graphApp.generators.MyErdosRenyiGraphGenerator;
 import org.elka.graphApp.generators.MyWattsStrogatzGraphGenerator;
@@ -32,8 +32,8 @@ public class BenchmarkExecutor {
 
         DijkstraBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> dijkstraSolver = new
                 DijkstraBasedAlgorithmSolver<>();
-        SurballeBasesdAlgorithmSolver<Integer, MyWeightedEdge<Integer>> surballeSolver = new
-                SurballeBasesdAlgorithmSolver<>();
+        SurballeBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> surballeSolver = new
+                SurballeBasedAlgorithmSolver<>();
         for (float i = startSize; i < endSize; i += (endSize - startSize) / (float) testsCount) {
             int size = Math.round(i);
             System.out.println("Test = Ilość węzłów: " + size);

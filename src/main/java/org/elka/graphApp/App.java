@@ -5,14 +5,13 @@ import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
-import org.elka.graphApp.algorithms.SurballeBasesdAlgorithmSolver;
+import org.elka.graphApp.algorithms.SurballeBasedAlgorithmSolver;
 import org.elka.graphApp.benchmark.BenchmarkConfiguration;
 import org.elka.graphApp.benchmark.BenchmarkExecutor;
 import org.elka.graphApp.benchmark.SingleMeasure;
 import org.elka.graphApp.display.LayoutMode;
 import org.elka.graphApp.display.SimpleGraphWindow;
 import org.elka.graphApp.generators.MySimpleGraphGenerator;
-import org.elka.graphApp.generators.MyWattsStrogatzGraphGenerator;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.ext.JGraphXAdapter;
@@ -88,7 +87,7 @@ public class App {
         Graph<Integer, MyWeightedEdge<Integer>> generatedGraph
                 = generator.Generate(6, 0.6, 123);
 
-        SurballeBasesdAlgorithmSolver<Integer, MyWeightedEdge<Integer>> solver = new SurballeBasesdAlgorithmSolver<>();
+        SurballeBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> solver = new SurballeBasedAlgorithmSolver<>();
         List<Integer> vertices = new ArrayList<>(generatedGraph.vertexSet());
 
         DrawGraph(generatedGraph, LayoutMode.Circle);
