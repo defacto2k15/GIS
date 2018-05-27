@@ -1,6 +1,5 @@
 package org.elka.graphApp.benchmark;
 
-import org.elka.graphApp.algorithms.AlgorithmType;
 import org.elka.graphApp.generators.GraphGeneratorType;
 
 /**
@@ -10,37 +9,29 @@ public class SingleMeasure {
 
     private final int nodesCount;
     private final int edgesCount;
-    private final AlgorithmType algorithmType;
     private final GraphGeneratorType generatorType;
-    private final float dijkstraPropability;
-    private final long time;
-    private double firstPathWeight;
-    private double secondPathWeight;
+    private final float generatorPropability;
     private int wattsKParam;
     private int dijkstraTriesCount;
+    private long dijkstraTime;
+    private long suurballeTime;
+    private double dijkstraFirstPathWeight;
+    private double dijkstraSecondPathWeight;
+    private double suurballeFirstPathWeight;
+    private double suurballeSecondPathWeight;
 
-    public SingleMeasure(int nodesCount, int edgesCount, AlgorithmType algorithmType, GraphGeneratorType generatorType,
-                         float dijkstraPropability, long time) {
+    public SingleMeasure(int nodesCount, int edgesCount,GraphGeneratorType
+            generatorType, float
+            generatorPropability) {
 
         this.nodesCount = nodesCount;
         this.edgesCount = edgesCount;
-        this.algorithmType = algorithmType;
         this.generatorType = generatorType;
-        this.dijkstraPropability = dijkstraPropability;
-        this.time = time;
+        this.generatorPropability = generatorPropability;
     }
 
-
-    public void setFirstPathWeight(double dijkstraFirstPathWeight) {
-        this.firstPathWeight = dijkstraFirstPathWeight;
-    }
-
-    public void setSecondPathWeight(double dijkstraSecondPathWeight) {
-        this.secondPathWeight = dijkstraSecondPathWeight;
-    }
-
-    public void setWattsKParam(int wattsKParam) {
-        this.wattsKParam = wattsKParam;
+    public void setDijkstraTriesCount(int dijkstraTriesCount) {
+        this.dijkstraTriesCount = dijkstraTriesCount;
     }
 
     public int getNodesCount() {
@@ -51,39 +42,71 @@ public class SingleMeasure {
         return edgesCount;
     }
 
-    public AlgorithmType getAlgorithmType() {
-        return algorithmType;
-    }
-
     public GraphGeneratorType getGeneratorType() {
         return generatorType;
     }
 
-    public float getDijkstraPropability() {
-        return dijkstraPropability;
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public double getFirstPathWeight() {
-        return firstPathWeight;
-    }
-
-    public double getSecondPathWeight() {
-        return secondPathWeight;
+    public float getGeneratorPropability() {
+        return generatorPropability;
     }
 
     public int getWattsKParam() {
         return wattsKParam;
     }
 
-    public void setDijkstraTriesCount(int dijkstraTriesCount) {
-        this.dijkstraTriesCount = dijkstraTriesCount;
+    public void setWattsKParam(int wattsKParam) {
+        this.wattsKParam = wattsKParam;
     }
 
     public int getDijkstraTriesCount() {
         return dijkstraTriesCount;
+    }
+
+    public long getDijkstraTime() {
+        return dijkstraTime;
+    }
+
+    public void setDijkstraTime(long dijkstraTime) {
+        this.dijkstraTime = dijkstraTime;
+    }
+
+    public long getSuurballeTime() {
+        return suurballeTime;
+    }
+
+    public void setSuurballeTime(long suurballeTime) {
+        this.suurballeTime = suurballeTime;
+    }
+
+    public double getDijkstraFirstPathWeight() {
+        return dijkstraFirstPathWeight;
+    }
+
+    public void setDijkstraFirstPathWeight(double dijkstraFirstPathWeight) {
+        this.dijkstraFirstPathWeight = dijkstraFirstPathWeight;
+    }
+
+    public double getDijkstraSecondPathWeight() {
+        return dijkstraSecondPathWeight;
+    }
+
+    public void setDijkstraSecondPathWeight(double dijkstraSecondPathWeight) {
+        this.dijkstraSecondPathWeight = dijkstraSecondPathWeight;
+    }
+
+    public double getSuurballeFirstPathWeight() {
+        return suurballeFirstPathWeight;
+    }
+
+    public void setSuurballeFirstPathWeight(double suurballeFirstPathWeight) {
+        this.suurballeFirstPathWeight = suurballeFirstPathWeight;
+    }
+
+    public double getSuurballeSecondPathWeight() {
+        return suurballeSecondPathWeight;
+    }
+
+    public void setSuurballeSecondPathWeight(double suurballeSecondPathWeight) {
+        this.suurballeSecondPathWeight = suurballeSecondPathWeight;
     }
 }

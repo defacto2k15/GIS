@@ -45,9 +45,7 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
                 V neighbour = edge.getTarget();
                 double alt = algWeight.get(edge.getSource()) + graph.getEdgeWeight(edge);
                 if (alt < algWeight.get(neighbour)) {
-                    if (algWeight.containsKey(neighbour)) {
-                        queue.remove(new DistancedVertex<>(neighbour, algWeight.get(neighbour)));
-                    }
+                    queue.remove(new DistancedVertex<>(neighbour, algWeight.get(neighbour)));
                     queue.add(new DistancedVertex<>(neighbour, alt));
                     algWeight.put(neighbour, alt);
                     predecessors.put(neighbour, u.getInnerVertex());

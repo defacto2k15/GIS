@@ -1,7 +1,6 @@
 package org.elka.graphApp.benchmark;
 
 import org.elka.graphApp.MyWeightedEdge;
-import org.elka.graphApp.algorithms.AlgorithmType;
 import org.elka.graphApp.algorithms.DijkstraBasedAlgorithmSolver;
 import org.elka.graphApp.algorithms.DijkstraSolvingExtendedResult;
 import org.elka.graphApp.algorithms.SurballeBasesdAlgorithmSolver;
@@ -12,6 +11,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,6 +32,8 @@ public class BenchmarkExecutor {
                 DijkstraBasedAlgorithmSolver<>();
         SurballeBasesdAlgorithmSolver<Integer, MyWeightedEdge<Integer>> surballeSolver = new
                 SurballeBasesdAlgorithmSolver<>();
+
+        AtomicInteger loopsCompleted = new AtomicInteger(0);
 
         return IntStream.range(0, testsCount).boxed()
                 .parallel()
@@ -56,6 +58,8 @@ public class BenchmarkExecutor {
                     Integer startVertex = vertices.get(0);
                     Integer endVertex = vertices.get(1);
 
+                    SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
+                            GraphGeneratorType.Erdos, propability);
 
                     if (configuration.shouldTestDijkstra()) {
                         long start = System.nanoTime();
@@ -63,10 +67,15 @@ public class BenchmarkExecutor {
                                 = dijkstraSolver.extendedFindTwoShortestPaths(graph, startVertex, endVertex, maxTriesCount);
                         long end = System.nanoTime();
 
-                        SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
-                                AlgorithmType.Dijkstra, GraphGeneratorType.Erdos, propability, end - start);
                         measure.setDijkstraTriesCount(result.getTriesCount());
-                        addMeasure(measures, result.getPaths(), measure);
+                        measure.setDijkstraTime(end-start);
+
+                        if(result.getPaths().size() > 0 ){
+                            measure.setDijkstraFirstPathWeight(result.getPaths().get(0).getWeight());
+                        }
+                        if(result.getPaths().size() > 1 ){
+                            measure.setDijkstraSecondPathWeight(result.getPaths().get(1).getWeight());
+                        }
                     }
 
                     if (configuration.shouldTestSurballe()) {
@@ -75,11 +84,16 @@ public class BenchmarkExecutor {
                                 = surballeSolver.findTwoShortestPaths(graph, startVertex, endVertex);
                         long end = System.nanoTime();
 
-                        SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
-                                AlgorithmType.Surballe, GraphGeneratorType.Erdos, propability, end - start);
-                        addMeasure(measures, outPaths, measure);
+                        measure.setSuurballeTime(end-start);
 
+                        if(outPaths.size() > 0){
+                            measure.setSuurballeFirstPathWeight(outPaths.get(0).getWeight());
+                        }
+                        if(outPaths.size() > 1 ){
+                            measure.setSuurballeSecondPathWeight(outPaths.get(1).getWeight());
+                        }
                     }
+                    measures.add(measure);
                 }
 
                 j++;
@@ -113,17 +127,25 @@ public class BenchmarkExecutor {
                         Integer startVertex = vertices.get(0);
                         Integer endVertex = vertices.get(1);
 
+                        SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
+                                GraphGeneratorType.Watts, propability);
+                        measure.setWattsKParam(kParam);
+
                         if (configuration.shouldTestDijkstra()) {
                             long start = System.nanoTime();
                             DijkstraSolvingExtendedResult<Integer, MyWeightedEdge<Integer>> result
                                     = dijkstraSolver.extendedFindTwoShortestPaths(graph, startVertex, endVertex, maxTriesCount);
                             long end = System.nanoTime();
 
-                            SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
-                                    AlgorithmType.Dijkstra, GraphGeneratorType.Watts, propability, end - start);
-                            measure.setWattsKParam(kParam);
                             measure.setDijkstraTriesCount(result.getTriesCount());
-                            addMeasure(measures, result.getPaths(), measure);
+                            measure.setDijkstraTime(end-start);
+
+                            if(result.getPaths().size() > 0 ){
+                                measure.setDijkstraFirstPathWeight(result.getPaths().get(0).getWeight());
+                            }
+                            if(result.getPaths().size() > 1 ){
+                                measure.setDijkstraSecondPathWeight(result.getPaths().get(1).getWeight());
+                            }
                         }
 
                         if (configuration.shouldTestSurballe()) {
@@ -132,29 +154,25 @@ public class BenchmarkExecutor {
                                     = surballeSolver.findTwoShortestPaths(graph, startVertex, endVertex);
                             long end = System.nanoTime();
 
-                            SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
-                                    AlgorithmType.Surballe, GraphGeneratorType.Watts, propability, end - start);
-                            measure.setWattsKParam(kParam);
-                            addMeasure(measures, outPaths, measure);
-                            addMeasure(measures, outPaths, measure);
+                            measure.setSuurballeTime(end-start);
+
+                            if(outPaths.size() > 0){
+                                measure.setSuurballeFirstPathWeight(outPaths.get(0).getWeight());
+                            }
+                            if(outPaths.size() > 1 ){
+                                measure.setSuurballeSecondPathWeight(outPaths.get(1).getWeight());
+                            }
                         }
+                        measures.add(measure);
                     }
                     j++;
                 }
 
             }
+            int loopsCompletedAfterThis = loopsCompleted.addAndGet(1);
+            System.out.println("Test = Completed "+(100*((float)loopsCompletedAfterThis)/testsCount)+"% done");
             return measures.stream();
         }).collect(Collectors.toList());
-    }
-
-    private void addMeasure(List<SingleMeasure> measures, List<GraphPath<Integer, MyWeightedEdge<Integer>>> outPaths, SingleMeasure measure) {
-        if (outPaths.size() > 0) {
-            measure.setFirstPathWeight(outPaths.get(0).getWeight());
-        }
-        if (outPaths.size() > 1) {
-            measure.setSecondPathWeight(outPaths.get(1).getWeight());
-        }
-        measures.add(measure);
     }
 
     float lerp(float a, float b, float f) {

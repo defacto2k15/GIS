@@ -12,24 +12,28 @@ public class BenchmarkConfiguration {
         return true;
     }
 
+    public boolean shouldTestSurballe() {
+        return false;
+    }
+
     public int getMinNodeCount() {
-        return 100;
+        return 10;
     }
 
     public int getMaxNodeCount() {
-        return 1000;
+        return 200;
     }
 
     public int getTestsCount() {
-        return 40;
+        return 50;
     }
 
     public int getPerGraphTestsCount(){
-        return 20;
+        return 3;
     }
 
     public List<Float> getErdosPropabilitiesPerTest() {
-        return Arrays.asList(0.6f, 0.8f, 0.9f);
+        return Arrays.asList(0.2f, 0.4f, 0.6f, 0.8f, 0.9f);
     }
 
     public List<Float> getWattsPropabilitiesPerTest() {
@@ -44,7 +48,4 @@ public class BenchmarkConfiguration {
         return Arrays.asList(0.2f, 0.4f, 0.6f, 0.8f);
     }
 
-    public boolean shouldTestSurballe() {
-        return false;
-    }
 }
