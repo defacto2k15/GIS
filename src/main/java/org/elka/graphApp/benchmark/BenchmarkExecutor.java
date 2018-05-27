@@ -23,8 +23,8 @@ public class BenchmarkExecutor {
         int endSize = configuration.getMaxNodeCount();
         int testsCount = configuration.getTestsCount();
 
-        List<Float> erdosPropabilitiesPerTest = configuration.getErdosPropabilitiesPerTest();
-        List<Float> wattsPropabilitiesPerTest = configuration.getWattsPropabilitiesPerTest();
+        List<Float> erdosProbabilitiesPerTest = configuration.getErdosProbabilitiesPerTest();
+        List<Float> wattsProbabilitiesPerTest = configuration.getWattsProbabilitiesPerTest();
         List<Integer> wattsKParamsPerTest = configuration.getWattsKParamsPerTest();
 
         MyErdosRenyiGraphGenerator erdosRenyiGenerator = new MyErdosRenyiGraphGenerator();
@@ -39,7 +39,7 @@ public class BenchmarkExecutor {
             System.out.println("Test = Ilość węzłów: " + size);
 
             int j = 0;
-            for (float propability : erdosPropabilitiesPerTest) {
+            for (float propability : erdosProbabilitiesPerTest) {
                 int seed = Math.round(i * 123.312f * (j + 1));
                 Graph<Integer, MyWeightedEdge<Integer>> graph
                         = erdosRenyiGenerator.Generate(size, propability, seed);
@@ -92,7 +92,7 @@ public class BenchmarkExecutor {
             }
 
             for (int kParam : wattsKParamsPerTest) {
-                for (float propability : wattsPropabilitiesPerTest) {
+                for (float propability : wattsProbabilitiesPerTest) {
                     int seed = Math.round(i * 123.312f * (j + 1));
                     Graph<Integer, MyWeightedEdge<Integer>> graph
                             = wattsStrogatzGenerator.Generate(size, kParam, propability, seed);
@@ -141,7 +141,6 @@ public class BenchmarkExecutor {
                         measures.add(measure);
 
                     }
-
                     j++;
                 }
 

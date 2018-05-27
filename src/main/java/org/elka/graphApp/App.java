@@ -1,5 +1,6 @@
 package org.elka.graphApp;
 
+import com.google.devtools.common.options.OptionsParser;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
@@ -19,17 +20,14 @@ import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.io.*;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class App {
     public static void main(String[] args) throws ImportException, CsvRequiredFieldEmptyException, IOException, CsvDataTypeMismatchException {
         App app = new App();
 //        app.run();
-        app.runBenchmark();
+        app.runBenchmark(args);
     }
 
     private SimpleGraphWindow window;
@@ -65,22 +63,36 @@ public class App {
         return g;
     }
 
-    private void addEdge(Graph<Integer, MyWeightedEdge<Integer>> g, int v1, int v2, int wegith) {
+    private void addEdge(Graph<Integer, MyWeightedEdge<Integer>> g, int v1, int v2, int weight) {
         MyWeightedEdge<Integer> edge7 = g.addEdge(v1, v2);
-        g.setEdgeWeight(edge7, wegith);
+        g.setEdgeWeight(edge7, weight);
         MyWeightedEdge<Integer> edge1 = g.addEdge(v2, v1);
-        g.setEdgeWeight(edge1, wegith);
+        g.setEdgeWeight(edge1, weight);
     }
 
-    public void runBenchmark() throws ImportException, IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+    public void runBenchmark(String[] args) throws ImportException, IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+        OptionsParser parser = OptionsParser.newOptionsParser(BenchmarkConfiguration.class);
+        parser.parseAndExitUponError(args);
+        BenchmarkConfiguration options = parser.getOptions(BenchmarkConfiguration.class);
+        if (options != null && options.isHelp()) {
+            printUsage(parser);
+            return;
+        }
         BenchmarkExecutor executor = new BenchmarkExecutor();
-        List<SingleMeasure> measures = executor.Execute(new BenchmarkConfiguration());
+        List<SingleMeasure> measures = executor.Execute(options);
         Writer writer = new FileWriter("result.csv");
         StatefulBeanToCsv<SingleMeasure> beanToCsv = new StatefulBeanToCsvBuilder<SingleMeasure>(writer)
                 .withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
         beanToCsv.write(measures);
         writer.close();
     }
+
+    private void printUsage(OptionsParser parser) {
+        System.out.println("Usage: app OPTIONS");
+        System.out.println(parser.describeOptions(Collections.<String, String>emptyMap(),
+                OptionsParser.HelpVerbosity.LONG));
+    }
+
 
     public void run() throws ImportException {
         MySimpleGraphGenerator generator = new MySimpleGraphGenerator();
