@@ -1,6 +1,5 @@
-package org.elka.graphApp;
+package org.elka.graphApp.algorithms;
 
-import org.elka.graphApp.algorithms.DijkstraBasedAlgorithmSolver;
 import org.elka.graphApp.generators.MySimpleGraphGenerator;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
