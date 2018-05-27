@@ -1,14 +1,11 @@
 package org.elka.graphApp.generators;
 
-import org.elka.graphApp.MyWeightedEdge;
+import org.elka.graphApp.algorithms.MyWeightedEdge;
 import org.jgrapht.Graph;
 import org.jgrapht.generate.GnpRandomGraphGenerator;
 import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 import org.jgrapht.graph.SimpleGraph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 /**
