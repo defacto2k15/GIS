@@ -12,14 +12,16 @@ public class GraphReader {
 
     public final static String FILE_FORMAT =
             "File format:\n" +
-            "   First Line: Num of Vertices - V,  Num of Edges - E\n" +
-            "   Followed by:\n" +
-            "   E lines which contains:  V1 V2 Weight\n" +
-            "   ex.\n" +
-            "        3 3\n" +
-            "        1 2 3\n" +
-            "        1 3 2\n" +
-            "        2 3 1\n";
+                    "   V lines and V columns  \n" +
+                    "   columns separated by comma \n" +
+                    "   in n-th row and k-th column \n" +
+                    "   weight of edge between vectors n and k \n"+
+                    "	,,99.0,,,90.0\n"+
+                    "	43.0,,,,,1.0\n"+
+                    "	,66.0,,42.0,,\n"+
+                    "	,,,,,29.0\n"+
+                    "	98.0,38.0,,76.0,,65.0\n"+
+                    "	,,37.0,,,";
 
     public static Graph<Integer, MyWeightedEdge<Integer>> readGraphFromFile(String fileName) {
         Graph<Integer, MyWeightedEdge<Integer>> graph =
