@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 public class SurballeBasedAlgorithmSolver<V, E extends MyWeightedEdge<V>> {
 
     public List<GraphPath<V, E>> findTwoShortestPaths(Graph<V, E> graph, V startVertex, V endVertex) {
+        Map<E, Double> weightsCache = graph.edgeSet().stream()
+                .collect(Collectors.toMap(c -> c, c -> c.getWeight()));
         DijkstraResult<V, E> firstDijkstraResult = dijkstra(graph, startVertex, endVertex);
         if (firstDijkstraResult == null) {
             return Collections.emptyList();
@@ -35,8 +37,8 @@ public class SurballeBasedAlgorithmSolver<V, E extends MyWeightedEdge<V>> {
         List<E> edgeList2 = shortestPath2.getEdgeList();
         List<E> firstPath = untwinePaths(edgeList1, edgeList2);
         List<E> secondPath = untwinePaths(edgeList2, edgeList1);
-        Double firstPathLength = calculatePathLength(graph, firstPath);
-        Double secondPathLength = calculatePathLength(graph, secondPath);
+        Double firstPathLength = calculatePathLength(weightsCache, firstPath);
+        Double secondPathLength = calculatePathLength(weightsCache, secondPath);
         //cleaning
         graph.edgeSet().forEach(
                 e -> graph.setEdgeWeight(e,
@@ -48,15 +50,10 @@ public class SurballeBasedAlgorithmSolver<V, E extends MyWeightedEdge<V>> {
         return Arrays.asList(result1, result2);
     }
 
-    private Double calculatePathLength(Graph<V, E> graph, List<E> path) {
+    private Double calculatePathLength(Map<E, Double> edgeWeights, List<E> path) {
         Double pathLength = 0.0;
         for (E edge : path) {
-            E edgeInGraph = graph.getEdge(edge.getSource(), edge.getTarget());
-            if (edgeInGraph != null) {
-                pathLength += edgeInGraph.getWeight();
-            } else {
-                pathLength += graph.getEdge(edge.getTarget(), edge.getSource()).getWeight();
-            }
+            pathLength += edgeWeights.get(edge);
         }
         return pathLength;
     }

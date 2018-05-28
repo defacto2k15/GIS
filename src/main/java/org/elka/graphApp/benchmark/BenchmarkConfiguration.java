@@ -17,31 +17,6 @@ import java.util.List;
 @Setter
 public class BenchmarkConfiguration extends OptionsBase {
 
-//<<<<<<< HEAD
-//    public boolean shouldTestSurballe() {
-//        return false;
-//    }
-//
-//    public int getMinNodeCount() {
-//        return 10;
-//    }
-//
-//    public int getMaxNodeCount() {
-//        return 200;
-//    }
-//
-//    public int getTestsCount() {
-//        return 50;
-//    }
-//
-//    public int getPerGraphTestsCount(){
-//        return 3;
-//    }
-//
-//    public List<Float> getErdosPropabilitiesPerTest() {
-//        return Arrays.asList(0.2f, 0.4f, 0.6f, 0.8f, 0.9f);
-//    }
-//=======
     @Option(
             name = "help",
             abbrev = 'h',
@@ -162,14 +137,14 @@ public class BenchmarkConfiguration extends OptionsBase {
     @Option(name = "dijkstraUser",
             abbrev = 'x',
             help = "Test for dijkstra",
-            defaultValue = "true",
+            defaultValue = "false",
             category = "user input" )
     public boolean dijkstra;
 
     @Option(name = "surballeUser",
             abbrev = 'f',
             help = "Test for surballe",
-            defaultValue = "true",
+            defaultValue = "false",
             category = "user input" )
     public boolean surballe;
 

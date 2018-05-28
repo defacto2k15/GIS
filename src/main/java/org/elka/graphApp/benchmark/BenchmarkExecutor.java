@@ -148,6 +148,10 @@ public class BenchmarkExecutor {
                                     if (result.getPaths().size() > 1) {
                                         measure.setDijkstraSecondPathWeight(result.getPaths().get(1).getWeight());
                                     }
+                                    if(measure.getDijkstraFirstPathWeight() == 0 && measure
+                                            .getDijkstraSecondPathWeight() != 0 ){{
+                                                int i = 22;
+                                    }}
                                 }
 
                                 if (configuration.shouldTestSurballe()) {

@@ -1,5 +1,7 @@
 package org.elka.graphApp.algorithms;
 
+import org.elka.graphApp.display.GraphUtils;
+import org.elka.graphApp.display.SimpleGraphWindow;
 import org.elka.graphApp.generators.MySimpleGraphGenerator;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
@@ -119,8 +121,8 @@ public class DijkstraBasedAlgorithmSolverTest {
     private void addEdge(Graph<Integer, MyWeightedEdge<Integer>> g, int v1, int v2, int wegith) {
         MyWeightedEdge<Integer> edge7 = g.addEdge(v1, v2);
         g.setEdgeWeight(edge7, wegith);
-        MyWeightedEdge<Integer> edge1 = g.addEdge(v2, v1);
-        g.setEdgeWeight(edge1, wegith);
+//        MyWeightedEdge<Integer> edge1 = g.addEdge(v2, v1);
+//        g.setEdgeWeight(edge1, wegith);
     }
 
     @Test
@@ -150,4 +152,70 @@ public class DijkstraBasedAlgorithmSolverTest {
         System.out.println("Method took "+(System.nanoTime()-start));
     }
 
+    @Test
+    public void testBoth(){
+//        Graph<Integer, MyWeightedEdge<Integer>> testGraph =
+//                generator.Generate(5, 0.8, 123);
+        Graph<Integer, MyWeightedEdge<Integer>> testGraph =
+                new SimpleDirectedWeightedGraph<>((e1, e2) -> new MyWeightedEdge<Integer>());
+
+        testGraph.addVertex(1);
+        testGraph.addVertex(2);
+        testGraph.addVertex(3);
+        testGraph.addVertex(4);
+        testGraph.addVertex(5);
+        testGraph.addVertex(6);
+
+        addEdge(testGraph, 1,2, 1);
+        addEdge(testGraph, 2 ,3, 3);
+        addEdge(testGraph, 3,6,4);
+        addEdge(testGraph, 1,4, 4);
+        addEdge(testGraph, 4,5, 5);
+        addEdge(testGraph, 2,5, 10);
+        addEdge(testGraph, 5,6, 2);
+
+        DijkstraBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> dijkstraSolver
+                = new DijkstraBasedAlgorithmSolver<>();
+        SurballeBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> surballeSolver = new
+                SurballeBasedAlgorithmSolver<>();
+
+        GraphPath<Integer, MyWeightedEdge<Integer>> dijkstraShortest =
+                dijkstraSolver.findShortestPath(testGraph, 1, 6);
+
+        List<GraphPath<Integer, MyWeightedEdge<Integer>>> twoShortestPaths
+                = surballeSolver.findTwoShortestPaths(testGraph, 1, 6);
+        int i = 12;
+    }
+
+    @Test
+    public void smallGraphTest(){
+//        for(int i = 0; i < 2000; i++) {
+        int i = 248;
+            Graph<Integer, MyWeightedEdge<Integer>> testGraph =
+                    generator.Generate(7, 0.6, i);
+
+            DijkstraBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> dijkstraSolver
+                    = new DijkstraBasedAlgorithmSolver<>();
+            SurballeBasedAlgorithmSolver<Integer, MyWeightedEdge<Integer>> surballeSolver = new
+                    SurballeBasedAlgorithmSolver<>();
+
+            List<GraphPath<Integer, MyWeightedEdge<Integer>>> dijkstraShortest =
+                    dijkstraSolver.findTwoShortestPaths(testGraph, 1, 6,10);
+
+            List<GraphPath<Integer, MyWeightedEdge<Integer>>> twoShortestPaths
+                    = surballeSolver.findTwoShortestPaths(GraphUtils.CopyDirectedWeightedGraph(testGraph), 1, 6);
+            if(dijkstraShortest.size() > 0  && twoShortestPaths.size() > 0 ) {
+                if (dijkstraShortest.get(0).getWeight() > twoShortestPaths.get(0).getWeight()) {
+                    int r = 22;
+                }
+            }
+
+        SimpleGraphWindow simpleGraphWindow = new SimpleGraphWindow(testGraph);
+        simpleGraphWindow.DrawGraph();
+//        simpleGraphWindow.colorShortestPaths(twoShortestPaths);
+        while (true){
+
+        }
+//        }
+    }
 }

@@ -88,7 +88,6 @@ public class SimpleGraphWindow extends JApplet {
 
     public <V, E> void colorShortestPaths(List<GraphPath<V, E>> walks) {
         if (walks.isEmpty()) {
-            System.out.println("No paths in argument!!!");
             return;
         }
         GraphPath<V, E> firstPath = walks.get(0);

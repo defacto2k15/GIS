@@ -14,8 +14,9 @@ public class GraphUtils {
             newGraph.addVertex(vertex);
         }
         for (E edge : ingraph.edgeSet()) {
-            newGraph.addEdge(edge.getSource(), edge.getTarget(), edge);
-            newGraph.setEdgeWeight(edge, ingraph.getEdgeWeight(edge));
+            E newEdge = newGraph.getEdgeFactory().createEdge(edge.getSource(), edge.getTarget());
+            newGraph.addEdge(edge.getSource(), edge.getTarget(), newEdge);
+            newGraph.setEdgeWeight(newEdge, edge.getWeight());
         }
         return newGraph;
     }

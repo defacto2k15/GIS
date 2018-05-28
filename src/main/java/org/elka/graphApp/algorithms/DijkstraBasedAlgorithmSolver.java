@@ -117,9 +117,8 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
         return extendedFindTwoShortestPaths(originalGraph, startVertex, endVertex, maxTriesCount).getPaths();
     }
 
-    public DijkstraSolvingExtendedResult<V,E> extendedFindTwoShortestPaths(Graph<V, E> originalGraph, V startVertex, V
-    endVertex, int
-            maxTriesCount) {
+    public DijkstraSolvingExtendedResult<V,E> extendedFindTwoShortestPaths(
+            Graph<V, E> originalGraph, V startVertex, V endVertex, int maxTriesCount) {
         GraphPath<V, E> firstPath = findShortestPath(originalGraph, startVertex, endVertex);
         if (firstPath == null) {
             return new DijkstraSolvingExtendedResult<>(Collections.emptyList(), 1);
@@ -155,7 +154,9 @@ public class DijkstraBasedAlgorithmSolver<V,E extends MyWeightedEdge<V>> {
             RemovePathInternalVertices(newFirstPath, secondPathGraph);
             secondPath = findShortestPath(secondPathGraph, startVertex, endVertex);
             if(secondPath != null ){
-                return new DijkstraSolvingExtendedResult<>(Arrays.asList(newFirstPath, secondPath), i+2);
+                List<GraphPath<V, E>> outList = Arrays.asList(newFirstPath, secondPath);
+                outList.sort(Comparator .comparing(GraphPath::getWeight));
+                return new DijkstraSolvingExtendedResult<>(outList, i+2);
             }
             register.AddNewTraversedPath(newFirstPath);
         }
