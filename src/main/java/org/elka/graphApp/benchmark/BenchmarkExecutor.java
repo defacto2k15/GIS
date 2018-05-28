@@ -6,6 +6,7 @@ import org.elka.graphApp.algorithms.MyWeightedEdge;
 import org.elka.graphApp.algorithms.AlgorithmType;
 import org.elka.graphApp.algorithms.DijkstraBasedAlgorithmSolver;
 import org.elka.graphApp.algorithms.SurballeBasedAlgorithmSolver;
+import org.elka.graphApp.display.GraphUtils;
 import org.elka.graphApp.generators.GraphGeneratorType;
 import org.elka.graphApp.generators.MyErdosRenyiGraphGenerator;
 import org.elka.graphApp.generators.MyWattsStrogatzGraphGenerator;
@@ -39,15 +40,85 @@ public class BenchmarkExecutor {
                 .parallel()
                 .flatMap(c -> {
                     List<SingleMeasure> measures = new ArrayList<>();
-                    for (float i = startSize; i < endSize; i += (endSize - startSize) / (float) testsCount) {
-                        int size = Math.round(i);
-                        System.out.println("[Test]  Ilość węzłów: " + size);
+                    int size = Math.round(lerp(configuration.minNodeCount, configuration.maxNodeCount, c / ((float)
+                            configuration.testsCount)));
+                    System.out.println("[Test]  Ilość węzłów: " + size);
 
-                        int j = 0;
-                        for (float propability : configuration.erdosProbabilitiesPerTest) {
-                            int seed = Math.round(i * 123.312f * (j + 1));
+                    int j = 0;
+                    for (float propability : configuration.erdosProbabilitiesPerTest) {
+                        int seed = Math.round(c * 123.312f * (j + 1));
+                        Graph<Integer, MyWeightedEdge<Integer>> graph
+                                = erdosRenyiGenerator.Generate(size, propability, seed);
+                        int maxTriesCount = 10;
+
+                        List<Integer> vertices = new ArrayList<>(graph.vertexSet());
+
+                        Random shuffleRandom = new Random(seed);
+                        for (int k = 0; k < configuration.testsPerGraphCount; k++) {
+                            Collections.shuffle(vertices, shuffleRandom);
+                            Integer startVertex = vertices.get(0);
+                            Integer endVertex = vertices.get(1);
+
+                            SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
+                                    GraphGeneratorType.Erdos, propability);
+
+                            if (configuration.shouldTestDijkstra()) {
+                                long start = System.nanoTime();
+                                DijkstraSolvingExtendedResult<Integer, MyWeightedEdge<Integer>> result
+                                        = dijkstraSolver.extendedFindTwoShortestPaths(graph, startVertex, endVertex, maxTriesCount);
+                                long end = System.nanoTime();
+
+                                measure.setDijkstraTriesCount(result.getTriesCount());
+                                measure.setDijkstraTime(end - start);
+
+                                if (result.getPaths().size() > 0) {
+                                    measure.setDijkstraFirstPathWeight(result.getPaths().get(0).getWeight());
+                                }
+                                if (result.getPaths().size() > 1) {
+                                    measure.setDijkstraSecondPathWeight(result.getPaths().get(1).getWeight());
+                                }
+                            }
+
+                            if (configuration.shouldTestSurballe()) {
+                                Graph<Integer, MyWeightedEdge<Integer>> graphCopy = GraphUtils.CopyDirectedWeightedGraph(graph);
+                                long start = System.nanoTime();
+                                List<GraphPath<Integer, MyWeightedEdge<Integer>>> outPaths
+                                        = surballeSolver.findTwoShortestPaths(graphCopy, startVertex, endVertex);
+                                long end = System.nanoTime();
+
+                                measure.setSuurballeTime(end - start);
+
+                                if (outPaths.size() > 0) {
+                                    measure.setSuurballeFirstPathWeight(outPaths.get(0).getWeight());
+                                }
+                                if (outPaths.size() > 1) {
+                                    measure.setSuurballeSecondPathWeight(outPaths.get(1).getWeight());
+                                }
+                            }
+                            measures.add(measure);
+                        }
+
+                        j++;
+                    }
+
+                    MyWattsStrogatzGraphGenerator wattsStrogatzGenerator = new MyWattsStrogatzGraphGenerator();
+                    List<Float> wattsPropabilitiesPerTest = configuration.wattsProbabilitiesPerTest;
+                    List<Float> wattsLerpKParamsPerTest = configuration.wattsLerpKParamsPerTest;
+                    List<Integer> wattsKParamsPerTest = configuration.wattsKParamsPerTest;
+
+                    if (wattsLerpKParamsPerTest != null) {
+                        wattsKParamsPerTest = wattsLerpKParamsPerTest.stream()
+                                .map(p -> Math.round(lerp((float) Math.log(size), size, p)))
+                                .map(k -> (int) roundEven(k))
+                                .filter(k -> k < size && k > Math.log(size))
+                                .distinct()
+                                .collect(Collectors.toList());
+                    }
+                    for (int kParam : wattsKParamsPerTest) {
+                        for (float propability : wattsPropabilitiesPerTest) {
+                            int seed = Math.round(c * 123.312f * (j + 1));
                             Graph<Integer, MyWeightedEdge<Integer>> graph
-                                    = erdosRenyiGenerator.Generate(size, propability, seed);
+                                    = wattsStrogatzGenerator.Generate(size, kParam, propability, seed);
                             int maxTriesCount = 10;
 
                             List<Integer> vertices = new ArrayList<>(graph.vertexSet());
@@ -59,7 +130,8 @@ public class BenchmarkExecutor {
                                 Integer endVertex = vertices.get(1);
 
                                 SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
-                                        GraphGeneratorType.Erdos, propability);
+                                        GraphGeneratorType.Watts, propability);
+                                measure.setWattsKParam(kParam);
 
                                 if (configuration.shouldTestDijkstra()) {
                                     long start = System.nanoTime();
@@ -79,9 +151,10 @@ public class BenchmarkExecutor {
                                 }
 
                                 if (configuration.shouldTestSurballe()) {
+                                    Graph<Integer, MyWeightedEdge<Integer>> graphCopy = GraphUtils.CopyDirectedWeightedGraph(graph);
                                     long start = System.nanoTime();
                                     List<GraphPath<Integer, MyWeightedEdge<Integer>>> outPaths
-                                            = surballeSolver.findTwoShortestPaths(graph, startVertex, endVertex);
+                                            = surballeSolver.findTwoShortestPaths(graphCopy, startVertex, endVertex);
                                     long end = System.nanoTime();
 
                                     measure.setSuurballeTime(end - start);
@@ -95,84 +168,13 @@ public class BenchmarkExecutor {
                                 }
                                 measures.add(measure);
                             }
-
                             j++;
                         }
 
-                        MyWattsStrogatzGraphGenerator wattsStrogatzGenerator = new MyWattsStrogatzGraphGenerator();
-                        List<Float> wattsPropabilitiesPerTest = configuration.wattsProbabilitiesPerTest;
-                        List<Float> wattsLerpKParamsPerTest = configuration.wattsLerpKParamsPerTest;
-                        List<Integer> wattsKParamsPerTest = configuration.wattsKParamsPerTest;
-
-                        if (wattsLerpKParamsPerTest != null) {
-                            wattsKParamsPerTest = wattsLerpKParamsPerTest.stream()
-                                    .map(p -> Math.round(lerp((float) Math.log(size), size, p)))
-                                    .map(k -> (int) roundEven(k))
-                                    .filter(k -> k < size && k > Math.log(size))
-                                    .distinct()
-                                    .collect(Collectors.toList());
-                        }
-                        for (int kParam : wattsKParamsPerTest) {
-                            for (float propability : wattsPropabilitiesPerTest) {
-                                int seed = Math.round(i * 123.312f * (j + 1));
-                                Graph<Integer, MyWeightedEdge<Integer>> graph
-                                        = wattsStrogatzGenerator.Generate(size, kParam, propability, seed);
-                                int maxTriesCount = 10;
-
-                                List<Integer> vertices = new ArrayList<>(graph.vertexSet());
-
-                                Random shuffleRandom = new Random(seed);
-                                for (int k = 0; k < configuration.testsPerGraphCount; k++) {
-                                    Collections.shuffle(vertices, shuffleRandom);
-                                    Integer startVertex = vertices.get(0);
-                                    Integer endVertex = vertices.get(1);
-
-                                    SingleMeasure measure = new SingleMeasure(vertices.size(), graph.edgeSet().size(),
-                                            GraphGeneratorType.Watts, propability);
-                                    measure.setWattsKParam(kParam);
-
-                                    if (configuration.shouldTestDijkstra()) {
-                                        long start = System.nanoTime();
-                                        DijkstraSolvingExtendedResult<Integer, MyWeightedEdge<Integer>> result
-                                                = dijkstraSolver.extendedFindTwoShortestPaths(graph, startVertex, endVertex, maxTriesCount);
-                                        long end = System.nanoTime();
-
-                                        measure.setDijkstraTriesCount(result.getTriesCount());
-                                        measure.setDijkstraTime(end - start);
-
-                                        if (result.getPaths().size() > 0) {
-                                            measure.setDijkstraFirstPathWeight(result.getPaths().get(0).getWeight());
-                                        }
-                                        if (result.getPaths().size() > 1) {
-                                            measure.setDijkstraSecondPathWeight(result.getPaths().get(1).getWeight());
-                                        }
-                                    }
-
-                                    if (configuration.shouldTestSurballe()) {
-                                        long start = System.nanoTime();
-                                        List<GraphPath<Integer, MyWeightedEdge<Integer>>> outPaths
-                                                = surballeSolver.findTwoShortestPaths(graph, startVertex, endVertex);
-                                        long end = System.nanoTime();
-
-                                        measure.setSuurballeTime(end - start);
-
-                                        if (outPaths.size() > 0) {
-                                            measure.setSuurballeFirstPathWeight(outPaths.get(0).getWeight());
-                                        }
-                                        if (outPaths.size() > 1) {
-                                            measure.setSuurballeSecondPathWeight(outPaths.get(1).getWeight());
-                                        }
-                                    }
-                                    measures.add(measure);
-                                }
-                                j++;
-                            }
-
-                        }
-                        int loopsCompletedAfterThis = loopsCompleted.addAndGet(1);
-                        System.out.println("[Test] = Ukończono" + (100 * ((float) loopsCompletedAfterThis) /
-                                testsCount) + "%");
                     }
+                    int loopsCompletedAfterThis = loopsCompleted.addAndGet(1);
+                    System.out.println("[Test] = Ukończono " + (int) (100 * ((float) loopsCompletedAfterThis) /
+                            testsCount) + "%");
                     return measures.stream();
                 }).collect(Collectors.toList());
     }

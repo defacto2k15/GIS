@@ -17,7 +17,7 @@ public class Benchmark {
     public static void runBenchmark(BenchmarkConfiguration options) throws ImportException, IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
         BenchmarkExecutor executor = new BenchmarkExecutor();
         List<SingleMeasure> measures = executor.Execute(options);
-        saveMeasuresToFile(measures, options.getOutputFile());
+        saveMeasuresToFile(measures, options.outputFile);
         return;
     }
 

@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.devtools.common.options.Converter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class CommaSeparatedFloats implements Converter<List<Float>> {
         }
         List<Float> integers = new ArrayList<>();
         for (String value : split) {
-            if (StringUtils.isNumeric(value)) {
+            if (NumberUtils.isCreatable(value)) {
                 integers.add(Float.valueOf(value));
             }
         }

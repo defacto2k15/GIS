@@ -39,7 +39,7 @@ public class MyErdosRenyiGraphGenerator  {
         });
 
         for (MyWeightedEdge<Integer> edge : outGraph.edgeSet()) {
-            outGraph.setEdgeWeight(edge, Math.floor(random.nextDouble()* MAX_WEIGHT));
+            outGraph.setEdgeWeight(edge, Math.max(0, Math.floor( random.nextDouble()* MAX_WEIGHT)));
         }
         return outGraph;
     }

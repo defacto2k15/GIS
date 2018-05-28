@@ -46,7 +46,7 @@ public class BenchmarkConfiguration extends OptionsBase {
             name = "help",
             abbrev = 'h',
             help = "Prints usage info.",
-            defaultValue = "true",
+            defaultValue = "false",
             category = "benchmark"
     )
     public boolean help;
@@ -93,8 +93,8 @@ public class BenchmarkConfiguration extends OptionsBase {
     public int testsCount;
 
     @Option(
-            name = "tests",
-            abbrev = 'h',
+            name = "testsPerGraphCount",
+            abbrev = 'q',
             help = "Sets number of tests per single graph",
             defaultValue = "40",
             category = "benchmark"
@@ -121,7 +121,6 @@ public class BenchmarkConfiguration extends OptionsBase {
             defaultValue = "0.8f"
     )
     public List<Float> wattsProbabilitiesPerTest;
-//>>>>>>> 27bbd5f1c290c804316cbdacc82faf5f2a5f9b20
 
     @Option(
             name = "kWatts",
@@ -141,7 +140,7 @@ public class BenchmarkConfiguration extends OptionsBase {
             allowMultiple = true,
             defaultValue = "0.5",
             category = "benchmark",
-            converter = CommaSeparatedIntegers.class
+            converter = CommaSeparatedFloats.class
     )
     public List<Float> wattsLerpKParamsPerTest;
 
@@ -178,16 +177,56 @@ public class BenchmarkConfiguration extends OptionsBase {
         return dijkstraTests;
     }
 
-//<<<<<<< HEAD
-//    public List<Float> getWattsLerpKParamsPerTest() {
-//        return Arrays.asList(0.2f, 0.4f, 0.6f, 0.8f);
-//    }
-//
-//=======
     public boolean shouldTestSurballe() {
         return surballeTests;
     }
 
+    @Option(name = "mode",
+            abbrev = 'g',
+            help = "mode of app",
+            defaultValue = "test",
+            category = "Mode setting" )
+    public String mode;
 
-//>>>>>>> 27bbd5f1c290c804316cbdacc82faf5f2a5f9b20
+    @Option(name = "startIndex",
+            abbrev = 'z',
+            help = "Index of start vertex in search",
+            defaultValue = "1",
+            category = "user input" )
+    public  int startIndex;
+
+    @Option(name = "endIndex",
+            abbrev = 'c',
+            help = "Index of end vertex in search",
+            defaultValue = "1",
+            category = "user input" )
+    public int endIndex;
+
+    @Option(name = "shouldShowWindow",
+            abbrev = 'v',
+            help = "Should window with paths be shown",
+            defaultValue = "false",
+            category = "user input" )
+    public boolean shouldShowWindow;
+
+    @Option(name = "generatorType",
+            abbrev = 'u',
+            help = "Grapg generator type",
+            defaultValue = "erdos",
+            category = "user input" )
+    public String generatorType;
+
+    @Option(name = "nodeCount",
+            abbrev = 'y',
+            help = "Nodes count in graph being generated",
+            defaultValue = "5",
+            category = "user input" )
+    public int nodesCount;
+
+    @Option(name = "seed",
+            abbrev = 'j',
+            help = "randomSeed",
+            defaultValue = "5",
+            category = "user input" )
+    public int seed;
 }
